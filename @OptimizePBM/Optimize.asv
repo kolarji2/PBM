@@ -1,0 +1,34 @@
+classdef Optimize
+%% Optimize 
+    %  
+    %% About PBM
+    % 
+    % PBM is a collection of matlab code for solving the population balance 
+    % equation (PBE) with size-dependent negative growth term, the case of
+    % dissolution.
+    % 
+    % PBE is solved via finite volume method with flux limiter.
+    % 
+    % TODO doc:
+    % Particle size distribution from experimental data
+    % Dissolution rate description
+    % Optimization, finding correct model parameters
+    % Reaction kinetics
+    %
+    %%  Usage
+    %
+    % PBM class contains all functionality
+    %   >> m = PBM; % create a new instance of the model
+    %
+    
+    %% PBM Properties
+        
+    properties
+    end
+    
+    methods
+    end
+end
+    
+    
+    
