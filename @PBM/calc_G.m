@@ -111,7 +111,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % BSD 3-Clause License
 % 
-% Copyright (c) 2021, Jiri Kolar
+% Copyright (c) 2021, Jiri Kolar, Suada Djukaj
 % All rights reserved.
 % 
 % Redistribution and use in source and binary forms, with or without
