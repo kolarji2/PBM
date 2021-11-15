@@ -1,8 +1,30 @@
 function [time,c,fn,phi_dist] = solve(obj,time)
 % solve(obj,time): Call any solver specified in obj.solver_name and return results.
 
+% ODE scaling            
+obj.ode_x0=(obj.x0.*obj.ode_scalepar).^obj.ode_xorder;
+obj.ode_xb=(obj.xb.*obj.ode_scalepar).^obj.ode_xorder;
+obj.ode_dx=obj.ode_xb(2:end)-obj.ode_xb(1:end-1); % cell width
+obj.ode_dxii=obj.ode_x0(2:end)-obj.ode_x0(1:end-1);
+obj.ode_Gscale=(obj.xb.*obj.ode_scalepar).^(obj.ode_xorder-1).*obj.ode_scalepar;
+obj.ode_Vscale=1./obj.ode_scalepar^obj.ode_xorder;  
+
+if strcmp(obj.ode_flux_limiter,'Koren')
+    phir= @(r) max(0,min(2*r,min(1/3+2/3*r,2))); % Koren Best performance for normal dist
+elseif strcmp(obj.ode_flux_limiter,'vanLeer')
+    phir= @(r) (abs(r)+r)/(1+abs(r)); %vanLeer
+elseif strcmp(obj.ode_flux_limiter,'superbee')
+    phir= @(r) max([0,min(2*r,1),min(r,2)]); %superbee
+elseif strcmp(obj.ode_flux_limiter,'minmod')
+    phir= @(r) max(0,min(1,r)); % minmod
+else
+    phir= @(r) 0; %no limiter
+end
+obj.ode_flux_limiter_h=phir;
+
+
 if isempty(obj.ode_options)
-    options = odeset('RelTol',1e-6,'AbsTol',1e-8);
+    options = odeset('RelTol',1e-6,'AbsTol',1e-8); %'NonNegative',1
 else
     options =obj.ode_options;
 end
@@ -15,8 +37,8 @@ if contains(obj.solver_name,'fx') || contains(obj.solver_name,'fvx')
 else
     y0=obj.y0fn;
 end
-
-[tt,yy] = ode15s(solverh,time, y0,options); % %data.times
+%ode23t
+[tt,yy] = obj.ode_solver_h(solverh,time, y0,options); % %data.times
 
 time=tt;
 c=yy(:,1:obj.Nconc);

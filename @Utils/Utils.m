@@ -34,13 +34,6 @@ function [xclass] = get_xclass_include0(obj,xbound)
     xbound=[0;xbound];
     xclass=0.5*(xbound(1:end-1)+xbound(2:end));
 end
-        
-
-function savefig_article(obj,fig,fpath)
-%savefig_article (obj,fig,fpath): save any figure in .fig and .png format
-    savefig(fig,[fpath '.fig']);
-    print(fig,'-dpng','-r150',[fpath '.png']);
-end
 
 function fc=get_mean_integral_values(obj,xsmooth,fsmooth,xb)
 %mean_integral_values(obj,xsmooth,fsmooth,xb): Calcalutes mean integral value
@@ -81,6 +74,14 @@ end
 
 
 end % end of methods
+
+methods(Static)
+    function savefig_article(fig,fpath)
+    %savefig_article (obj,fig,fpath): save any figure in .fig and .png format
+        savefig(fig,[fpath '.fig']);
+        print(fig,'-dpng','-r150',[fpath '.png']);
+    end
+end
 
 end % end of class Utils
 

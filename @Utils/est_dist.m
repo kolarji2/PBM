@@ -70,7 +70,11 @@ if ~strcmp(method,'pchip')
         %distfunMultiModal(x,dx,w,mu,sigma,dist0)
         distMulti=@(x,dx,a) obj.distfunMultiModal(x,dx,a(1:npeaks),a((npeaks+1):2*npeaks),a((2*npeaks+1):3*npeaks),dist0);
         
+        % Fitting both distribution form and histogram form
         objFun=@(a) 1e-12*sum((phi0_dist-distMulti(xexp,dxexp,a)).^2)+sum((phi0_dist.*dxexp-distMulti(xexp,dxexp,a).*dxexp).^2);
+        
+        % Fitting only histogram form
+        %objFun=@(a) sum((phi0_dist-distMulti(xexp,dxexp,a)).^2);
         a0=zeros(1,3*npeaks);
         %w0=1/npeaks;
         %mu0=sum(phi0_dist.*dxexp.*xexp);

@@ -75,18 +75,13 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
         % Name of the solver used for PBE solution        
         % Defines numerical method:
         % * dissolve_fxfvm - finite volume method on fn*x^ode_xorder
-        %                  - with flux limiter and some initial conditions can be slow
-        % * dissolve_qamar_fxfvm - similar to dissolve_fxfvm but flux
-        %                          limiter is used for G*f not just f
-        %                        - more robust
-        % * dissolve_FD - simple finite diference method, fast, but diffusive  
-        solver_name='dissolve_qamar_fxfvm';
+        % * dissolve_FD - simple finite diference method  
+        solver_name='dissolve_fxfvm';
         
         % What matlab solver to use
-        %   ode15s - ussually fastest, but if flux limiter is used, it can be extremely slow
-        %            for some initial conditions
-        %   ode23t - robust, similar speed for all cases
-        ode_solver_h=@ode23t
+        %   ode15s - with 
+        %
+        ode_solver_h=@ode15s
                 
         % Use flux limiter
         %   * none
@@ -106,6 +101,9 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
         % see function dissolve_fxfvm, 
         % ode_xorder>=1 !
         ode_xorder=1;
+        
+        % Values that are considered as zero
+        ode_zeroval=1e-9
         
         % ODE scaling, assigned in solve.m
         ode_x0
@@ -364,7 +362,7 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
     properties (SetAccess = private)
         
         % solver_name options
-        solver_name_list={'dissolve_fxfvm','dissolve_qamar_fxfvm','dissolve_FD','reactive_dissolve_fxfvm'};
+        solver_name_list={'dissolve_fxfvm','dissolve_fvfvm','reactive_dissolve_fxfvm'};
         
         % properties needed for Wilke-Chang method
         check_diff_wilkechang_list={'etaf','T','assoc_par','Mf','Vmol_solute'};

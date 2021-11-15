@@ -1,4 +1,4 @@
-function dydt = dissolve_fxfvm(obj,t,y)
+function dydt = dissolve_qamar_fxfvm(obj,t,y)
 %dissolve_fxfvm(obj,t,y) Solve population balance with finite volume method
 %   Use flux limiter to reduce numerical diffusion
 %
@@ -38,8 +38,10 @@ N=obj.N; % number of cell
 
 c=y(1:obj.Nconc); % concentration, must be in kg/m3 or g/l (same value)!
 fx=y(obj.Nconc+1:end);
-G=obj.Gfun(obj,t,c,obj.xb).*obj.ode_Gscale; %obj.xb.^(obj.ode_xorder-1).*obj.ode_scalepar; % calculate growth rate (dxdt) at boundaries xb
+ode_Gscale=(obj.x0.*obj.ode_scalepar).^(obj.ode_xorder-1).*obj.ode_scalepar;
+G=obj.Gfun(obj,t,c,obj.x0).*ode_Gscale; %obj.xb.^(obj.ode_xorder-1).*obj.ode_scalepar; % calculate growth rate (dxdt) at boundaries xb
 Gf=zeros(N+1,1); %G*fx
+Gfc=G.*fx; %value in cell center
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   
@@ -58,32 +60,31 @@ phir=obj.ode_flux_limiter_h;
     if G(1)>0
         Gf(1)=0; %no nucleation
         %Gf(2)=G(1)*(fx(1));
-        ri=(fx(2)-fx(1)+eps)/((fx(1)-0)+eps);    
-        Gf(2)=G(2)*(fx(1)+0.5*phir(ri)*dx(1)/dxii(1)*(fx(2)-fx(1)));   
-        Gf(N+1)=G(N+1)*(fx(N)+0.5*dx(N)/dxii(N-1)*(fx(N)-fx(N-1)));
+        ri=(Gfc(2)-Gfc(1)+eps)/((Gfc(1)-0)+eps);    
+        Gf(2)=(Gfc(1)+0.5*phir(ri)*dx(1)/dxii(1)*(Gfc(2)-Gfc(1)));   
+        Gf(N+1)=(Gfc(N)+0.5*dx(N)/dxii(N-1)*(Gfc(N)-Gfc(N-1)));
     else
-        Gf(1)=G(1)*(fx(1)-0.5*(fx(2)-fx(1))*dx(1)/dxii(1));
-        Gf(N)=G(N)*(fx(N)-0.5*(fx(N)-fx(N-1))*dx(N)/dxii(N-1));
+        Gf(1)=(Gfc(1)-0.5*(Gfc(2)-Gfc(1))*dx(1)/dxii(1));
+        Gf(N)=(Gfc(N)-0.5*(Gfc(N)-Gfc(N-1))*dx(N)/dxii(N-1));
         Gf(N+1)=0; %no addition of large particles
     end
     if G(1)>0
         for i=3:N
             ic=i-1;
             %ri upwind ratio of two consecutive solution gradients
-            ri=((fx(ic+1)-fx(ic))+eps)/((fx(ic)-fx(ic-1))+eps)*dxii(ic-1)/dxii(ic); 
-            fxbound=(fx(ic)+0.5*phir(ri)*dx(ic)/dxii(ic)*(fx(ic)-fx(ic-1)));
-            if fxbound<0
-                fxbound=0;
+            ri=((Gfc(ic+1)-Gfc(ic))+eps)/((Gfc(ic)-Gfc(ic-1))+eps)*dxii(ic-1)/dxii(ic); 
+            gfxbound=(Gfc(ic)+0.5*phir(ri)*dx(ic)/dxii(ic)*(Gfc(ic)-Gfc(ic-1)));
+            if gfxbound<0
+                gfxbound=0;
             end
-            Gf(i)=G(i)*fxbound;    
+            Gf(i)=gfxbound;    
         end
     else %negative growth
         for i=2:N-1
             ic=i-1;
             %ri upwind ratio of two consecutive solution gradients
-            ri=((fx(ic)-fx(ic+1))+eps)/((fx(ic+1)-fx(ic+2))+eps)*dxii(ic+1)/dxii(ic);
-            fxbound=(fx(ic+1)+0.5*phir(ri)*dx(ic+1)/dxii(ic+1)*(fx(ic+1)-fx(ic+2)));  
-            Gf(i)=G(i)*fxbound;    
+            ri=((Gfc(ic)-Gfc(ic+1))+eps)/((Gfc(ic+1)-Gfc(ic+2))+eps)*dxii(ic+1)/dxii(ic);            
+            Gf(i)=(Gfc(ic+1)+0.5*phir(ri)*dx(ic+1)/dxii(ic+1)*(Gfc(ic+1)-Gfc(ic+2)));
         end
     end
 
@@ -92,13 +93,7 @@ phir=obj.ode_flux_limiter_h;
 %   Final mass balance for particles
 %   Last term arise from initial multiplication of diff equation by x
 %
-dfxdt=(Gf(1:end-1)-Gf(2:end))./dx+0.5*(G(1:end-1)+G(2:end)).*fx./x0;
-% Smooth dydt
-%dfxdt(abs(dfxdt.*dx)<obj.ode_zeroval)=0;
-%sel=abs(dfxdt)<1e-5;
-%sum(dfxdt(sel))
-%dfxdt(abs(dfxdt)<1e-5)=0;
-
+dfxdt=(Gf(1:end-1)-Gf(2:end))./dx+0.5*(Gf(1:end-1)+Gf(2:end))./x0;
 dVdt=sum(-obj.fV.*dfxdt.*dx.*obj.x0.^(3-obj.ode_xorder).*obj.ode_Vscale);    
 dcdt_particles = obj.vol2c.*dVdt;
 dcdt=zeros(size(c));

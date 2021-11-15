@@ -1,20 +1,28 @@
-classdef OptimizePBM
+classdef OptimizePBM < matlab.mixin.Copyable
 %% OptimizePBM - Class for finding optimal parameters of the model
     %  
     %% About OptimizePBM
     % 
     % OptimizePBM is used to simplify optimization on multiple experimental data
     % 
-    %   Idea is to 
-    %%  Usage
     %   
+    %%  Usage
+    %   Important note, Matlab always pass class as a reference. So all PBM
+    %   classes passed to variable "models" are still references to the same
+    %   object. 
+    %
+    %   This means that evaluation of the objective function change model
+    %   parameters!
     %   
     
     %% PBM Properties
         
     properties
         
-        %models - cell of initialized PBM model for each experiment
+        % models - cell of initialized PBM model for each experiment
+        % remains connected, matlab pass class always as a reference!
+        % Pass a copy of the PBM class if you do not want to share reference
+        % e.g. models={m.copy}
         models
         
         % cell of experimental data for each experiment
@@ -40,7 +48,8 @@ classdef OptimizePBM
         % Method for error (performance) calculation
         error_method='mse';
         
-        % objfun handle
+        % objfun handle: err=@(x,models,expdata)
+        % must accept (x,models,expdata) and return error 
         objfun_h
         
         % Number of points evaluated in each iteration (particleswarm method)
@@ -48,6 +57,15 @@ classdef OptimizePBM
         
         % Initial guess for unconstrained optimization
         x0
+        
+        % Results of the solver
+        xres
+        
+        % Iterations of the solver
+        xiter
+        
+        % Iteration error of the solver
+        erriter
         
         %% Settings for generic objfun
         
@@ -178,13 +196,13 @@ classdef OptimizePBM
         function err=mse(obj,x,y,w)
            % Calculate error Mean Squered error  
            w(w==0)=1;
-           err=sum((x-y).^2,'all')./prod(size(x));
+           err=sum((x-y).^2./w,'all')./prod(size(x));
         end
         
         function err=msre(obj,x,y,w)
            % Calculate error Mean Squered error  
            w(w==0)=1;
-           err=sqrt(sum((x-y).^2,'all')./prod(size(x)));
+           err=sqrt(sum((x-y).^2./w,'all')./prod(size(x)));
         end
         
         function err=mae(obj,x,y,w)
@@ -194,11 +212,14 @@ classdef OptimizePBM
         end
                 
         function res=optimize(obj,idname,logFileName)
+            obj.xiter=[];
+            obj.erriter=[];
+            
             % Find optimal model parameters
             if strcmp(obj.objfun_method,'generic')
                 fun=@(x) obj.objfun_generic(x);
             elseif strcmp(obj.objfun_method,'handle')
-                fun=@(x) obj.objfun_h(x,models,expdata);
+                fun=@(x) obj.objfun_h(x,obj.models,obj.expdata);
             else
                 error('Unknown value in objfun_method');
             end
@@ -212,6 +233,19 @@ classdef OptimizePBM
             else
                 error('Unknown value in solver_method');
             end
+            obj.xres=res;
+        end
+        
+        function err=eval(obj,x)
+            % Find optimal model parameters
+            if strcmp(obj.objfun_method,'generic')
+                fun=@(x) obj.objfun_generic(x);
+            elseif strcmp(obj.objfun_method,'handle')
+                fun=@(x) obj.objfun_h(x,obj.models,obj.expdata);
+            else
+                error('Unknown value in objfun_method');
+            end
+            err=fun(x);
         end
         
         %% Solvers
@@ -287,6 +321,8 @@ classdef OptimizePBM
         
         function print_res(obj,x,fval)
             % print to output
+            obj.xiter=[obj.xiter;x];
+            obj.erriter=[obj.erriter;fval];
             if obj.log_to_screen
                 fprintf('x: ')
                 fprintf('%e, ',x)
