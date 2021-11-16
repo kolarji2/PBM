@@ -5,11 +5,12 @@ PBE is solved via finite volume method with flux limiter.
 
 ## Use cases
 PBM was used in the following article:
+
 S. Djukaj, J. Kolář, R. Lehocký, A. Zadražil, F. Štěpánek, Design of particle size distribution for custom dissolution profiles by solving the inverse problem, Powder Technology, 2021
 
 [https://doi.org/10.1016/j.powtec.2021.10.023](https://doi.org/10.1016/j.powtec.2021.10.023)
 
-See directory DjukajEtAl to see code used to calculate results and create figures used in the article.
+See directory DjukajEtAl to see matlab code used in the article.
 
 ##  Usage
 
