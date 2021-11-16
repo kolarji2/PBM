@@ -2,7 +2,15 @@
 PBM is a collection of matlab code files for solving the population balance equation (PBE) with size-dependent negative growth term, the case of dissolution.
 
 PBE is solved via finite volume method with flux limiter.
-    
+
+## Use cases
+PBM was used in the following article:
+S. Djukaj, J. Kolář, R. Lehocký, A. Zadražil, F. Štěpánek, Design of particle size distribution for custom dissolution profiles by solving the inverse problem, Powder Technology, 2021
+
+[https://doi.org/10.1016/j.powtec.2021.10.023](https://doi.org/10.1016/j.powtec.2021.10.023)
+
+See directory DjukajEtAl to see code used to calculate results and create figures used in the article.
+
 ##  Usage
 
 Create a new instance of the model
@@ -65,5 +73,7 @@ Plot results
 	figure
 	plot(m.tm,m.cm)
 
+
+This example of the PBM usage can be found as well in the file "demo.m".
     
 
