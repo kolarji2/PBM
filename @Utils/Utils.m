@@ -35,17 +35,17 @@ function [xclass] = get_xclass_include0(obj,xbound)
     xclass=0.5*(xbound(1:end-1)+xbound(2:end));
 end
 
-function fc=get_mean_integral_values(obj,xsmooth,fsmooth,xb)
+function [fc,xc]=get_mean_integral_values(obj,xsmooth,fsmooth,xb)
 %mean_integral_values(obj,xsmooth,fsmooth,xb): Calcalutes mean integral value
 %   Evaluate function in new points (coarse discretization)
     fc=zeros(length(xb)-1,1);
     Np=1000;
     for i=1:length(xb)-1
         x=linspace(xb(i),xb(i+1),Np);
-        f=interp1(xsmooth,fsmooth,x);
+        f=interp1(xsmooth,fsmooth,x,'linear',0);
         fc(i)=trapz(x,f)./(x(end)-x(1));
     end
-
+    xc=obj.get_xclass_fromBounds(xb);
 end
 
 function phim_scaled=get_scaled_dist(obj,x,dx,phim_dist,xb_coarse)

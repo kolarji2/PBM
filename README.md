@@ -12,6 +12,16 @@ S. Djukaj, J. Kolář, R. Lehocký, A. Zadražil, F. Štěpánek, Design of part
 
 See directory DjukajEtAl to see matlab code used in the article.
 
+## Dependencies
+* MATLAB
+* Signal Processing Toolbox
+* Statistics and Machine Learning Toolbox
+
+## Installation
+
+
+
+
 ##  Usage
 
 Create a new instance of the model

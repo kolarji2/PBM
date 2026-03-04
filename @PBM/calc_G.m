@@ -48,7 +48,9 @@ if (strcmp(obj.Sh_method,'settling') || strcmp(obj.Sh_method,'levins')) & ~isfie
     obj.vsettle=vsettle;
 end
 
-if strcmp(obj.Sh_method,'settling')
+if strcmp(obj.Sh_method,'const2')
+    Sh = 2;
+elseif strcmp(obj.Sh_method,'settling')
     vsettle=obj.vsettle;
     vt=obj.vtcorr*obj.vsettle;
     velo=obj.vcorr*sqrt(obj.v.^2+vt.^2);
@@ -88,8 +90,13 @@ elseif  strcmp(obj.Sh_method,'archimedes')
     Rep=obj.rhof*pi*xb./obj.etaf*N*D;    
     Sh = 2+0.0096*Rep.^(2/3).*Sc.^(1/3).*Ar.^(0.16);
 end
+kM0 = obj.kmcorr*obj.diffcorr*Sh.*obj.diff./xb;
 
-kM = obj.kmcorr*obj.diffcorr*Sh.*obj.diff./xb;
+if strcmp(obj.kM_method,'kM_fun')
+    kM=obj.kM_fun_h(kM0);
+else
+    kM=kM0;
+end
 
 % G [m/s]
 % dc -> m3/m3

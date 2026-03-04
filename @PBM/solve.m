@@ -30,7 +30,11 @@ else
 end
 
 %options = odeset('RelTol',1e-8,'AbsTol',1e-10);
-solverh=@(t,y) obj.(obj.solver_name)(t,y); %str2func
+if obj.ode_use_reaction
+    solverh=@(t,y) obj.reactive_dissolve(t,y); %str2func
+else
+    solverh=@(t,y) obj.(obj.solver_name)(t,y); %str2func
+end
 
 if contains(obj.solver_name,'fx') || contains(obj.solver_name,'fvx')
     y0=obj.y0fx;

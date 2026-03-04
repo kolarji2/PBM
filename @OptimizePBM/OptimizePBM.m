@@ -41,11 +41,17 @@ classdef OptimizePBM < matlab.mixin.Copyable
         objfun_method='generic';
         
         % Numerical method for solution of the optimization problem
-        % particleswarm
-        % patternsearch
+        % particleswarm - needs lb,ub
+        % patternsearch - needs x0,lb,ub
+        % fminsearch - needs only x0
+        % fmincon - needs x0,lb,ub
+        % fminbnd - only 1D, needs lb,ub
         solver_method='particleswarm';
         
         % Method for error (performance) calculation
+        % mse - mean squared error
+        % mae - mean absolute error
+        % msre - mean square root error
         error_method='mse';
         
         % objfun handle: err=@(x,models,expdata)
@@ -66,6 +72,21 @@ classdef OptimizePBM < matlab.mixin.Copyable
         
         % Iteration error of the solver
         erriter
+        
+        %% Settings for solver accuracy
+        
+        % Termination tolerance on x, a positive scalar.
+        % The default value is 1e-4
+        TolX=1e-4;
+        
+        % Termination tolerance on the function value, a positive scalar.
+        % The default is 1e-4.
+        TolFun=1e-4;
+        
+        % Maximum number of iterations allowed, a positive integer.
+        % The default value is 200*numberOfVariables (assigned if empty)
+        Maxiter=[]
+        numberOfVariables
         
         %% Settings for generic objfun
         
@@ -163,24 +184,24 @@ classdef OptimizePBM < matlab.mixin.Copyable
                 m.set_initial_conditions(m.cstart,m.cs0,m.conc_units);
                 sel=expi.texp<=obj.time_max;
                 time=expi.texp(sel);
-                time_unique=unique(time);
-                m.solve(time_unique);
+                time_unique=unique(time);                
+                m.solve(time_unique);                    
                 %% Calculate error                
                 for j=1:size(obj.target_list,1)
                     k0=1;
-                    x_unique=obj.get_target(m,obj.target_list(j,k0:k0+dk-1));
+                    ym_unique=obj.get_target(m,obj.target_list(j,k0:k0+dk-1));
                     k0=k0+dk;
-                    y=obj.get_target(expi,obj.target_list(j,k0:k0+dk-1));
-                    y=y(sel,:);
-                    k0=k0+dk;
-                    x=interp1(time_unique,x_unique,time);
-                    x=reshape(x,size(y));
+                    yexp=obj.get_target(expi,obj.target_list(j,k0:k0+dk-1));
+                    yexp=yexp(sel,:);
+                    k0=k0+dk;                    
+                    ym=interp1(time_unique,ym_unique,time);
+                    ym=reshape(ym,size(ym));
                     if Nvals==3 || Nvals==6
                         errweight=obj.get_target(expi,obj.target_list(j,k0:k0+dk-1));                        
                         errweight=errweight(sel,:);
-                        err=err+obj.(obj.error_method)(x,y,errweight);
+                        err=err+obj.(obj.error_method)(ym,yexp,errweight);
                     else
-                        err=err+obj.(obj.error_method)(x,y,1);
+                        err=err+obj.(obj.error_method)(ym,yexp,1);
                     end                    
                 end
             end
@@ -212,9 +233,15 @@ classdef OptimizePBM < matlab.mixin.Copyable
         end
                 
         function res=optimize(obj,idname,logFileName)
+            % idname - identificator string            
+            % logFileName - path to file where opt results are written
+            %        - use logFileName=[] to turn off logging to file
+            
             obj.xiter=[];
             obj.erriter=[];
-            
+            if isempty(logFileName)
+                obj.log_to_file=false;
+            end
             % Find optimal model parameters
             if strcmp(obj.objfun_method,'generic')
                 fun=@(x) obj.objfun_generic(x);
@@ -225,11 +252,15 @@ classdef OptimizePBM < matlab.mixin.Copyable
             end
             
             if strcmp(obj.solver_method,'particleswarm')
-                res=obj.find_optimum_ps(fun,obj.lb,obj.ub,obj.swarm_size,idname,logFileName);
+                res=obj.solver_particleswarm(fun,obj.lb,obj.ub,obj.swarm_size,idname,logFileName);
             elseif strcmp(obj.solver_method,'patternsearch')
                 res=obj.solver_patternsearch(fun,obj.x0,obj.lb,obj.ub,idname,logFileName);
             elseif strcmp(obj.solver_method,'fminsearch')
                 res=obj.solver_fminsearch(fun,obj.x0,idname,logFileName);
+            elseif strcmp(obj.solver_method,'fmincon')
+                res=obj.solver_fmincon(fun,obj.x0,obj.lb,obj.ub,idname,logFileName);
+            elseif strcmp(obj.solver_method,'fminbnd')
+                res=obj.solver_fminbnd(fun,obj.lb,obj.ub,idname,logFileName);
             else
                 error('Unknown value in solver_method');
             end
@@ -255,8 +286,13 @@ classdef OptimizePBM < matlab.mixin.Copyable
         %   
             obj.check_empty(fun,'fun')
             obj.check_empty(x0,'x0')
+            obj.numberOfVariables=length(x0);
+            if isempty(obj.Maxiter)
+                obj.Maxiter=200*obj.numberOfVariables;
+            end
             if obj.log_to_screen display_opt='iter'; else display_opt='none'; end;
-            options = optimset('Display',display_opt,'OutputFcn',@obj.report_fminsearch);
+            options = optimset('Display',display_opt,'OutputFcn',@obj.report_fminsearch, ...
+                                    'TolX',obj.TolX,'TolFun',obj.TolFun,'MaxIter',obj.Maxiter);
 
             [x,fval,exitflag,output] = fminsearch(fun,obj.x0,options);
             obj.append_to_file(x,fval,id,logFileName);
@@ -268,13 +304,17 @@ classdef OptimizePBM < matlab.mixin.Copyable
             %the file
             obj.check_empty(fun,'fun')            
             obj.check_empty(lb,'lb')
-            obj.check_empty(ub,'ub') 
-            obj.check_empty(swarm_size,'swarm_size') 
+            obj.check_empty(ub,'ub')                        
+            obj.check_empty(swarm_size,'swarm_size')
+            obj.numberOfVariables=length(lb);
+            if isempty(obj.Maxiter)
+                obj.Maxiter=200*obj.numberOfVariables;
+            end
             
             if obj.log_to_screen display_opt='iter'; else display_opt='none'; end;
             options = optimoptions('particleswarm','UseParallel',true, ...
                     'SwarmSize',swarm_size,'HybridFcn',@patternsearch, ...
-                    'Display',display_opt,'OutputFcn',@obj.reportx_ps)
+                    'Display',display_opt,'OutputFcn',@obj.reportx_ps);
 
             [x,fval,exitflag,output] = particleswarm(fun,length(lb),lb,ub,options);
             obj.append_to_file(x,fval,id,logFileName);
@@ -288,11 +328,108 @@ classdef OptimizePBM < matlab.mixin.Copyable
             obj.check_empty(x0,'x0')
             obj.check_empty(lb,'lb')
             obj.check_empty(ub,'ub')    
+            obj.numberOfVariables=length(x0);
+            if isempty(obj.Maxiter)
+                obj.Maxiter=200*obj.numberOfVariables;
+            end
+            
             if obj.log_to_screen display_opt='iter'; else display_opt='none'; end;
             options = optimoptions('patternsearch','UseParallel',true, ...
-                    'Display',display_opt,'OutputFcn',@obj.report_patternsearch);
-            fileID = fopen(logFileName,'a');
+                    'Display',display_opt,'OutputFcn',@obj.report_patternsearch, ...
+                    'TolX',obj.TolX,'TolFun',obj.TolFun,'MaxIter',obj.Maxiter);
+            
             [x,fval] = patternsearch(fun,x0,[],[],[],[],lb,ub,[],options);
+            obj.append_to_file(x,fval,id,logFileName);
+        end
+        
+        function [ x ] = solver_fmincon(obj,fun,x0,lb,ub,id,logFileName)
+        %solver_fmincon (obj,fun,x0,lb,ub,id,logFileName)
+        % Find minimum of constrained nonlinear multivariable function (estimate derivatives)
+        %   
+            obj.check_empty(fun,'fun')
+            obj.check_empty(x0,'x0')
+            obj.check_empty(lb,'lb')
+            obj.check_empty(ub,'ub')    
+            obj.numberOfVariables=length(x0);
+            if isempty(obj.Maxiter)
+                obj.Maxiter=200*obj.numberOfVariables;
+            end
+            
+            if obj.log_to_screen display_opt='iter'; else display_opt='none'; end;
+            options = optimoptions('fmincon','UseParallel',true, ...
+                    'Display',display_opt,'OutputFcn',@obj.report_fminsearch, ...
+                    'StepTolerance',obj.TolX,'MaxIterations',obj.Maxiter);
+            
+            [x,fval] = fmincon(fun,x0,[],[],[],[],lb,ub,[],options);
+            obj.append_to_file(x,fval,id,logFileName);
+        end
+        
+        function [ x ] = solver_fminbnd(obj,fun,lb,ub,id,logFileName)
+        %solver_fminbnd (obj,fun,lb,ub,id,logFileName)
+        % Find minimum in bounds, only for 1d problems
+        %   
+            obj.check_empty(fun,'fun')
+            obj.check_empty(lb,'lb')
+            obj.check_empty(ub,'ub')    
+            obj.numberOfVariables=length(lb);
+            if obj.numberOfVariables>1
+                error('\n<strong> Solver fminbnd supports only 1D problems! </strong>\n')
+            end
+            if isempty(obj.Maxiter)
+                obj.Maxiter=200
+            end
+            
+            if obj.log_to_screen display_opt='iter'; else display_opt='none'; end;
+            
+            xa0=lb;
+            a0=0;
+            b0=ub-lb;
+            seta1=true;
+            setb1=true;
+            p=1; % TODO: directional search 
+            r=(3-sqrt(5))/2;
+            tol=obj.TolX;
+            for i=1:obj.Maxiter         
+                da=b0-a0;
+                if seta1
+                    seta1=false;
+                    a1=r*da+a0;
+                    x1=xa0+a1.*p;
+                    fx1=fun(x1);
+                    if obj.log_to_screen
+                        obj.print_res(x1,fx1);
+                    end
+                end
+                if setb1
+                    setb1=false;
+                    b1=(1-r)*da+a0;
+                    x2=xa0+b1.*p;
+                    fx2=fun(x2);
+                    if obj.log_to_screen
+                        obj.print_res(x2,fx2);
+                    end
+                end
+                if (b0-a0)<tol
+                    break
+                end
+                if fx1<fx2
+                    b0=b1;
+                    b1=a1;
+                    fx2=fx1;
+                    seta1=true;
+                else
+                    a0=a1;
+                    a1=b1;
+                    fx1=fx2;
+                    setb1=true;
+                end                
+            end
+                               
+            x=xa0+(a1+b1)/2.*p;
+            fval=fun(x);
+            if obj.log_to_screen
+                 obj.print_res(x,fval);
+            end
             obj.append_to_file(x,fval,id,logFileName);
         end
         

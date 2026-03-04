@@ -82,6 +82,8 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
         % * dissolve_FD - simple finite diference method, fast, but diffusive  
         solver_name='dissolve_qamar_fxfvm';
         
+        ode_use_reaction=false;
+        
         % What matlab solver to use
         %   ode15s - ussually fastest, but if flux limiter is used, it can be extremely slow
         %            for some initial conditions
@@ -124,7 +126,16 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
         % Calculate mass trasnfer and growth rate
         Gfun=@(obj,t,c,xb) calc_G(obj,t,c,xb);
         
+        % Method for kM estimation (mass transfer coefficient)
+        % Possible methods:
+        % * calculated | none | default - use directly calculated kM0 from Sherwood number
+        % * kM_fun - use kM_fun_h - to calculate kM, kM_fun_h(kM0)
+        kM_method='calculated'
+        
         % Method for mass transfer estimation (used by calc_G)
+        %   calculates Sherwood number and kM0 from Sh
+        %   levins | kolmogorov | settling | const2
+        %
         Sh_method='kolmogorov';
         
         % Method for estimating solute saturated concentration (used by calc_G)
@@ -272,6 +283,11 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
         % Used if method is csat_fun
         % @(c) mycsat_fun(c,pars)
         csat_fun_h
+        
+        % Function handle to calculate kM [1/s]
+        % Used if kM_method is kM_fun
+        % @(kM0) mykM_fun(kM0,pars)
+        kM_fun_h
         
         %% Units conversion
         
@@ -449,6 +465,8 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
             end
             % Setting w, assigns distribution phi0_distest as well:
             obj.w=w;
+            obj.mu_arr=mu_arr;
+            obj.sigma_arr=sigma_arr;
             
         end
         
