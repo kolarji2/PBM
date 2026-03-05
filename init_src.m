@@ -2,5 +2,5 @@
 %Initialize all paths for model
 
 addpath(['./' 'DjukajEtAl']) 
-addpath(['./' 'erik']) 
-addpath(['./' 'kuba']) 
+addpath(['./' 'SonntagEtAl/']) 
+addpath(['./' 'MuzikEtAl/']) 

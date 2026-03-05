@@ -523,7 +523,7 @@ classdef PBM < Utils & matlab.mixin.Copyable & matlab.mixin.SetGet
             obj.sigma_arr=sigma_arr;
             
             % Setting w, assigns distribution as well:
-            obj.w=w;            
+            obj.w=w;
             % phi0_distest=sum(w.*phi0_distestAll,2);
             % obj.phi0_distest=phi0_distest./sum(phi0_distest.*obj.dx);
             

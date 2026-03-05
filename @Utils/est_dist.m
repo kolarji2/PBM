@@ -119,6 +119,8 @@ if dispfit
     text(1e-6,mean(phi0_distest),txt_);
     semilogx(x,phi0_distest,'-b')    
     legend({'exp';'final fit'}) %'guess';
+    xlabel('Diameter [m]')
+    ylabel('vol. PDF [m^{-1}]')
     
     subplot(2,1,2)
     phi0hist=interp1(x,phi0_distest,xexp).*dxexp;
@@ -126,6 +128,8 @@ if dispfit
     hold on
     semilogx(xexp,phi0hist,'-b')  
     legend({'exp';'final fit'}) %'guess';
+    xlabel('Diameter [m]')
+    ylabel('Volume fraction [-]')
 end
 end
 

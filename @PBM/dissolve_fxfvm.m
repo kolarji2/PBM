@@ -1,5 +1,7 @@
 function dydt = dissolve_fxfvm(obj,t,y)
 %dissolve_fxfvm(obj,t,y) Solve population balance with finite volume method
+%   dissolve_fxfvm - finite volume method on fn*x^ode_xorder
+%                  - with flux limiter and some initial conditions can be slow
 %   Use flux limiter to reduce numerical diffusion
 %
 %   use modified population balance: fn*x

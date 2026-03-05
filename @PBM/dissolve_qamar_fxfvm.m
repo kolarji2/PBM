@@ -1,5 +1,7 @@
 function dydt = dissolve_qamar_fxfvm(obj,t,y)
 %dissolve_fxfvm(obj,t,y) Solve population balance with finite volume method
+%   dissolve_qamar_fxfvm - similar to dissolve_fxfvm but flux limiter is used for G*f not just f
+%                        - more robust
 %   Use flux limiter to reduce numerical diffusion
 %
 %   use modified population balance: fn*x

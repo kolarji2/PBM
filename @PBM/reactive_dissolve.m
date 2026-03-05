@@ -1,7 +1,7 @@
 function dydt = reactive_dissolve(obj,t,y)
-% reactive_dissolve_fxfvm - 
+% reactive_dissolve -
 %   solve PBE coupled with reaction kinetics
-%   reuse dissolve_fxfvm to solve PBE with flux limited finite volume method
+%   reuse defined obj.solver_name to solve PBE with flux limited finite volume method
 %   
 %   Can not handle reaction in film ( Da << 1 )
 %   Reaction rate and growth rate must have same time units!
