@@ -20,7 +20,7 @@ model_arr=cell(Nexp,1);
 
 fname='MuzikEtAl/results/reaction_results.xlsx';
 
-exps_sel=[1:6]
+exps_sel=[1:6];
 for iexp=exps_sel
     tic
         
@@ -57,11 +57,11 @@ for iexp=exps_sel
     m.csat=calc_csat(m,m.cTintrinsic,m.cCO3tot,m.cNa);
 
     fprintf('(Exp %d) %s\n', iexp, m.title);
-    fprintf('logS0(%.0f) = %.2f mol/l\n', m.T-273.15, log10(cTintrinsic));
+    fprintf('log10[S0(%.0f)] = %.2f mol/l\n', m.T-273.15, log10(cTintrinsic));
     %% Optimized model pars
     m.epsilon=0.01; % m2/s3
     m.ode_scalepar=1e6;
-    m.ode_flux_limiter='Koren';        % Koren
+    m.ode_flux_limiter='Koren';  % Koren | None
     
     m.kMaCO2=5e-4;
     if iexp==5

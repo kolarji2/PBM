@@ -63,7 +63,7 @@ for iexp=exps_sel %[3:6] %[4,6] %[1:5] %[1:5] %1:5 %[1:4]
     %% Optimized model pars
     m.epsilon=0.01;
     m.ode_scalepar=1e6;
-    m.ode_flux_limiter='Koren';        
+    m.ode_flux_limiter='Koren';    % Koren | None      
     
     m.kMaCO2=5e-4;
     

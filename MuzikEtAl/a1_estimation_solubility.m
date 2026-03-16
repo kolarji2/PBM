@@ -1,4 +1,9 @@
 %
+%   Example of usage of modified PBM class for 
+%		modelling of pH dependent dissolution of telmisartan.
+%		
+%		Modified @PBM class can be found in directory: @PBMTelmi 
+%
 % Estimates intrinsic solulbility of Telmisartan
 % Uses simplified Apelblat equation to interpolate between 25C and 65C
 %

@@ -2,7 +2,7 @@ classdef PBMTelmi < PBM
     %% Population Balance Model (PBM) for Dissolution of Telmisartan
     %   This is modification of PBM class suitable for description of 
     %   pH dependent dissolution
-    %% About PBM
+    %% About PBMTelmi
     %   Model assumes acid-base equilibrium between 
     %   * all 8 possible protonated/deprotonated states of Telmisartan.
     %   * HCO3(1-), CO3(2-), CO2

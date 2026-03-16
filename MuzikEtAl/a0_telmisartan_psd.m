@@ -1,3 +1,13 @@
+%
+%   Example of usage of modified PBM class for 
+%		modelling of pH dependent dissolution of telmisartan.
+%		
+%		Modified @PBM class can be found in directory: @PBMTelmi 
+%
+% Show initial Particle size distribution and fit using lognormal PSD used
+% for Telmisartan particles
+%
+
 m=PBMTelmi();
 if ~exist('TimeEnd45','var')
     [exps,TimeEnd45,TimeEnd55,TimeEnd65,TimeEndData,prop] = load_exp_data_telmisartan(m);

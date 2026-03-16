@@ -18,6 +18,8 @@ See directory DjukajEtAl to see matlab code used in the article.
 
 E. Sonntag, J. Kolář, S. Djukaj, R. Lehocký, F. Štěpánek, Accelerated reactive dissolution model of drug release from long-acting injectable formulations,  Eur J Pharm Biopharm, 2023
 
+[https://doi.org/10.1016/j.ejpb.2023.06.003](https://doi.org/10.1016/j.ejpb.2023.06.003)
+
 See directory SonntagEtAl to see matlab code used in the article.
 
 ## MuzikEtAl

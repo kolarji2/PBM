@@ -69,7 +69,7 @@ parfor iexp=1:Nexp
     %% Optimized model pars
     m.epsilon=0.01; % m2/s3
     m.ode_scalepar=1e6;
-    m.ode_flux_limiter='Koren';        
+    m.ode_flux_limiter='Koren';   % Koren | None       
     
     % Case 1: Normal CO2 release
     m.kMaCO2=5e-4; % 1/s 
