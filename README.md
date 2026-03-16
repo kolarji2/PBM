@@ -4,13 +4,29 @@ PBM is a collection of matlab code files for solving the population balance equa
 PBE is solved via finite volume method with flux limiter.
 
 ## Use cases
-PBM was used in the following article:
+PBM was used in the work below.
+
+## DjukajEtAl
 
 S. Djukaj, J. Kolář, R. Lehocký, A. Zadražil, F. Štěpánek, Design of particle size distribution for custom dissolution profiles by solving the inverse problem, Powder Technology, 2021
 
 [https://doi.org/10.1016/j.powtec.2021.10.023](https://doi.org/10.1016/j.powtec.2021.10.023)
 
 See directory DjukajEtAl to see matlab code used in the article.
+
+## SonntagEtAl
+
+E. Sonntag, J. Kolář, S. Djukaj, R. Lehocký, F. Štěpánek, Accelerated reactive dissolution model of drug release from long-acting injectable formulations,  Eur J Pharm Biopharm, 2023
+
+See directory SonntagEtAl to see matlab code used in the article.
+
+## MuzikEtAl
+
+J. Mužík, J. Kolář, M. Večeřa, O. Vojtíšková, V. Klimša, G. Sedmak, F. Štěpánek, Reaction kinetics and population balance modelling of telmisartan neutralization by sodium carbonate, ...
+
+[aticle url to be added](aticle_url)
+
+See directory MuzikEtAl to see matlab code used in the article.
 
 ## Dependencies
 * MATLAB
