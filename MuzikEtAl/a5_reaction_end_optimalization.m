@@ -23,6 +23,11 @@ tend0=120*ones(size(cexpTelmi)); %h
 wpure_Na2CO3=0.928;
 wpure_Telmi=0.996;
 
+% Case 1: Normal CO2 release
+kMaCO2=5e-4; % 1/s 
+% Case 2: Enhanced CO2 release
+%kMaCO2=20e-4; % 1/s 
+
 Nexp=length(cexpTelmi);
 model_arr=cell(Nexp,1);
 tend_arr=zeros(Nexp,1);
@@ -71,10 +76,7 @@ parfor iexp=1:Nexp
     m.ode_scalepar=1e6;
     m.ode_flux_limiter='Koren';   % Koren | None       
     
-    % Case 1: Normal CO2 release
-    m.kMaCO2=5e-4; % 1/s 
-    % Case 2: Enhanced CO2 release
-    %m.kMaCO2=20e-4; % 1/s 
+    m.kMaCO2=kMaCO2
     
     %% Init model
     m.make_loggrid(-8,-2,300);    
@@ -102,7 +104,7 @@ parfor iexp=1:Nexp
 end
 
 cm_arr=cn_arr.*[m.MtelH,m.MNa2CO3];
-matfile_path=sprintf('MuzikEtAl/results/time_end_ka_%d.mat',m.kMaCO2*1e4);
+matfile_path=sprintf('MuzikEtAl/results/time_end_ka_%d.mat',kMaCO2*1e4);
 save(matfile_path,'tend_arr','cn_arr','cm_arr');
 
 %
