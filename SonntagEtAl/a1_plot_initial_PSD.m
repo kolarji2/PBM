@@ -44,6 +44,8 @@ for iexp=1:Nexp
     hold(ax,'on');
 end
 legend(ax)
+xlabel('Diameter [m]')
+ylabel('Volume fraction [%]')
 
 return
 

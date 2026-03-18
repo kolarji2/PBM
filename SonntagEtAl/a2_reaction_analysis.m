@@ -23,6 +23,8 @@ hold on
 errorbar(time,data.cexpPP_mean(sel),data.cexpPP_std(sel),'or')
 plot(t_integ,cP,'-b')
 errorbar(time,data.cexpP_mean(sel),data.cexpP_std(sel),'ob')
+ylabel('Concentration [umol/L]')
+xlabel('Time [days]')
 
 function [cPP,cP]= solve_pp_reaction(x, t_eval, data)
     %solve_pp_reaction Solve model for given kinetics parameters
